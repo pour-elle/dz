@@ -23,5 +23,5 @@ const STORE_CONFIG = {
   sendOrderToWhatsapp: true,
 
   // توصيل مجاني ابتداءً من هذا المبلغ (0 = معطّل)
-  freeShippingFrom: 8000
+  freeShippingFrom: 7000
 };
