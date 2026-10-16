@@ -13,12 +13,14 @@
 
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const money = n => `${Number(n).toLocaleString("fr-DZ").replace(/ | /g, " ")} ${C.currency}`;
-  const findProduct = id => PRODUCTS.find(p => p.id === id);
+  const PRODUCTS_KEY = "pourelle_products";
+  let products = PRODUCTS;
+  const findProduct = id => products.find(p => p.id === id);
   const catName = id => (CATEGORIES.find(c => c.id === id) || {}).name || "";
 
   /* ---------- Cart ---------- */
   const load = () => { try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; } catch { return []; } };
-  let cart = load().filter(i => findProduct(i.id));
+  let cart = load();
   const save = () => { try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch {} updateCount(); };
   const lineKey = (id, opt) => `${id}__${opt || ""}`;
 
@@ -62,7 +64,7 @@
 
   /* ---------- Pages ---------- */
   function home() {
-    const featured = PRODUCTS.slice(0, 8);
+    const featured = products.slice(0, 8);
     return `
       <section class="hero">
         <img src="assets/banner.jpg" alt="Pour Elle — Parce qu'elle compte aussi">
@@ -110,14 +112,14 @@
   }
   function renderShopGrid(catId, q = "") {
     q = q.trim().toLowerCase();
-    const list = PRODUCTS.filter(p => (!catId || p.category === catId) && (!q || (p.name + p.description).toLowerCase().includes(q)));
+    const list = products.filter(p => (!catId || p.category === catId) && (!q || (p.name + p.description).toLowerCase().includes(q)));
     document.getElementById("shopGrid").innerHTML = list.length ? list.map(card).join("") : `<p class="empty" style="grid-column:1/-1">لا توجد منتجات مطابقة</p>`;
   }
 
   function product(id) {
     const p = findProduct(id);
     if (!p) return `<div class="empty"><h2>المنتج غير موجود</h2><p><a class="btn" href="#/shop">العودة للمتجر</a></p></div>`;
-    const related = PRODUCTS.filter(x => x.category === p.category && x.id !== p.id).slice(0, 4);
+    const related = products.filter(x => x.category === p.category && x.id !== p.id).slice(0, 4);
     return `
       <p class="breadcrumb"><a href="#/">الرئيسية</a> / <a href="#/shop/${p.category}">${esc(catName(p.category))}</a> / ${esc(p.name)}</p>
       <section class="product">
@@ -277,9 +279,9 @@
       };
 
       let sent = false;
-      if (C.ordersEndpoint) {
+      if (C.apiUrl) {
         try {
-          await fetch(C.ordersEndpoint, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(order) });
+          await fetch(C.apiUrl, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(order) });
           sent = true;
         } catch (err) { console.error(err); }
       }
@@ -362,7 +364,42 @@
   if (C.whatsapp) wa.href = `https://wa.me/${C.whatsapp}`; else wa.remove();
   if (C.freeShippingFrom) document.getElementById("freeShipNote").textContent = `· 🎁 توصيل مجاني ابتداءً من ${money(C.freeShippingFrom)}`;
 
-  updateCount();
-  window.addEventListener("hashchange", route);
-  route();
+  /* المنتجات: من لوحة التحكم (Google Sheets) إن وُجد apiUrl، وإلا من products.js */
+  const readCache = () => { try { return JSON.parse(localStorage.getItem(PRODUCTS_KEY)); } catch { return null; } };
+  async function fetchProducts() {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 10000);
+    try {
+      const res = await fetch(`${C.apiUrl}?action=products`, { signal: ctrl.signal });
+      const j = await res.json();
+      if (!j.ok || !Array.isArray(j.products) || !j.products.length) return null;
+      try { localStorage.setItem(PRODUCTS_KEY, JSON.stringify(j.products)); } catch {}
+      return j.products;
+    } catch (err) { console.warn("products fetch failed", err); return null; }
+    finally { clearTimeout(timer); }
+  }
+  function useProducts(list) {
+    products = list;
+    cart = cart.filter(i => findProduct(i.id));
+    save();
+  }
+
+  async function init() {
+    window.addEventListener("hashchange", route);
+    if (!C.apiUrl) { useProducts(PRODUCTS); route(); return; }
+    const cached = readCache();
+    if (cached && cached.length) {
+      useProducts(cached); route();
+      const fresh = await fetchProducts();
+      if (fresh && JSON.stringify(fresh) !== JSON.stringify(cached)) {
+        useProducts(fresh);
+        if (!location.hash.startsWith("#/checkout")) route();
+      }
+    } else {
+      app.innerHTML = `<p class="empty">جاري التحميل...</p>`;
+      useProducts((await fetchProducts()) || PRODUCTS);
+      route();
+    }
+  }
+  init();
 })();

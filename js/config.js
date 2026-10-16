@@ -15,9 +15,9 @@ const STORE_CONFIG = {
   facebook: "https://facebook.com/",
   tiktok: "",
 
-  // رابط Google Apps Script لاستقبال الطلبات في Google Sheets (مجاني)
-  // راجع ملف README.md لطريقة الحصول عليه. إذا تركته فارغاً تُرسل الطلبات عبر واتساب.
-  ordersEndpoint: "",
+  // رابط Google Apps Script (مجاني): يستقبل الطلبات ويشغّل لوحة التحكم admin.html
+  // راجع README.md لطريقة الحصول عليه. إذا تركته فارغاً: المنتجات من products.js والطلبات عبر واتساب فقط.
+  apiUrl: "",
 
   // فتح واتساب تلقائياً بعد تأكيد الطلب (لنسخة إضافية من الطلب)
   sendOrderToWhatsapp: true,
