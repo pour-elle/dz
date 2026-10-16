@@ -121,7 +121,10 @@
     return `
       <p class="breadcrumb"><a href="#/">الرئيسية</a> / <a href="#/shop/${p.category}">${esc(catName(p.category))}</a> / ${esc(p.name)}</p>
       <section class="product">
-        <div class="gallery"><img src="${esc(p.image)}" alt="${esc(p.name)}"></div>
+        <div>
+          <div class="gallery"><img id="mainImg" src="${esc(p.image)}" alt="${esc(p.name)}"></div>
+          ${p.images && p.images.length > 1 ? `<div class="thumbs">${p.images.map((src, i) => `<button class="${i === 0 ? "active" : ""}" data-img="${esc(src)}"><img src="${esc(src)}" alt="" loading="lazy"></button>`).join("")}</div>` : ""}
+        </div>
         <div>
           ${p.badge ? `<span class="chip active" style="display:inline-block;margin-bottom:8px">${esc(p.badge)}</span>` : ""}
           <h1>${esc(p.name)}</h1>
@@ -321,6 +324,9 @@
       const p = findProduct(t.dataset.add);
       if (p.options && p.options.length) { location.hash = `#/product/${p.id}`; return; }
       addToCart(p.id);
+    } else if (t.dataset.img) {
+      document.getElementById("mainImg").src = t.dataset.img;
+      document.querySelectorAll(".thumbs button").forEach(b => b.classList.toggle("active", b === t));
     } else if (t.dataset.opt !== undefined) {
       document.querySelectorAll("#opts .chip").forEach(c => c.classList.toggle("active", c === t));
     } else if (t.dataset.q) {

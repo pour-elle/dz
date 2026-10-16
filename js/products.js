@@ -11,6 +11,16 @@ const CATEGORIES = [
 ];
 
 const PRODUCTS = [
+  { id: "enzo-multi-air-styler", category: "beaute", name: "مصفف الشعر ENZO Keratin Multi Air Styler", price: 9900, oldPrice: 12900,
+    image: "assets/products/enzo-styler-1.jpg",
+    images: ["assets/products/enzo-styler-1.jpg", "assets/products/enzo-styler-2.jpg", "assets/products/enzo-styler-3.jpg", "assets/products/enzo-styler-4.jpg", "assets/products/enzo-styler-5.jpg"],
+    badge: "جديد",
+    description: "جهاز تصفيف الشعر الاحترافي ENZO Professional متعدد الاستعمالات: تجفيف، تمليس، تكثيف وتمويج — كل ذلك بجهاز واحد وبهواء ذكي يحمي شعرك من الحرارة الزائدة.\n" +
+      "✔ تحكم ذكي في الحرارة 1000 مرة في الثانية لحماية الشعر\n" +
+      "✔ 3 درجات: بارد، دافئ، ساخن\n" +
+      "✔ رؤوس متعددة: فرشاة بيضاوية كبيرة للتكثيف، فرشاة دائرية، فرشاة تمليس، رأسان لتجعيد الشعر (يمين ويسار)، ورأس تجفيف\n" +
+      "✔ يأتي في علبة هدية فاخرة مع حقيبة جلدية للحفظ — هدية مثالية",
+    options: [] },
   { id: "serum-rose", category: "beaute", name: "سيروم الورد للوجه", price: 2900, oldPrice: 3500,
     image: "assets/placeholder.svg", badge: "الأكثر مبيعاً",
     description: "سيروم مرطّب بخلاصة الورد وحمض الهيالورونيك، يمنح بشرتك نضارة وإشراقة طبيعية من أول استعمال. مناسب لجميع أنواع البشرة.",
