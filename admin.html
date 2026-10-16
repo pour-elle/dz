@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>لوحة التحكم — Pour Elle</title>
+  <link rel="icon" href="assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;700&family=Great+Vibes&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin">
+  <!-- تسجيل الدخول -->
+  <section id="loginView" class="login-wrap">
+    <form id="loginForm" class="panel login">
+      <img src="assets/logo.jpg" alt="Pour Elle">
+      <h1>لوحة التحكم</h1>
+      <div id="setupNote" class="note" hidden>
+        ⚠️ لم يتم ربط المتجر بعد. ضعي رابط Google Apps Script في <code>js/config.js</code> داخل <code>apiUrl</code> (راجعي README.md).
+      </div>
+      <div class="field"><label>كلمة السر</label><input type="password" name="password" required autocomplete="current-password"></div>
+      <p class="form-error" id="loginError"></p>
+      <button class="btn block" type="submit">دخول</button>
+      <a href="./" class="back-link">← العودة للمتجر</a>
+    </form>
+  </section>
+
+  <!-- اللوحة -->
+  <section id="dashView" hidden>
+    <header class="admin-header">
+      <div class="container admin-header-inner">
+        <a href="./" class="brand" target="_blank" rel="noopener">
+          <img src="assets/logo.jpg" alt="">
+          <span class="brand-text"><b>Pour Elle</b><small>لوحة التحكم</small></span>
+        </a>
+        <nav class="tabs">
+          <button class="tab active" data-tab="orders">🧾 الطلبات <span class="pill" id="newBadge"></span></button>
+          <button class="tab" data-tab="products">🛍️ المنتجات</button>
+        </nav>
+        <button class="btn outline small" id="logoutBtn">خروج</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- الطلبات -->
+      <div id="ordersTab">
+        <div class="stats" id="stats"></div>
+        <div class="toolbar">
+          <input class="search" id="orderSearch" type="search" placeholder="ابحثي بالاسم، الهاتف، رقم الطلب أو الولاية...">
+          <button class="btn outline small" id="refreshOrders">↻ تحديث</button>
+          <button class="btn outline small" id="exportCsv">⬇ تصدير Excel</button>
+        </div>
+        <div class="filters" id="statusFilters"></div>
+        <div id="ordersList" class="orders"></div>
+      </div>
+
+      <!-- المنتجات -->
+      <div id="productsTab" hidden>
+        <div class="toolbar">
+          <input class="search" id="productSearch" type="search" placeholder="ابحثي عن منتج...">
+          <button class="btn small" id="addProduct">+ إضافة منتج</button>
+        </div>
+        <div id="importBox" class="note" hidden>
+          لا توجد منتجات في لوحة التحكم بعد.
+          <button class="btn pink small" id="importBtn">استيراد المنتجات الحالية من products.js</button>
+        </div>
+        <div id="productsList" class="admin-products"></div>
+      </div>
+    </main>
+  </section>
+
+  <!-- نافذة المنتج -->
+  <dialog id="productDialog" class="dialog">
+    <form id="productForm" class="form" method="dialog">
+      <div class="dialog-head">
+        <h2 id="dialogTitle">منتج جديد</h2>
+        <button type="button" class="icon-btn" data-close aria-label="إغلاق">✕</button>
+      </div>
+      <div class="field"><label>اسم المنتج *</label><input name="name" required></div>
+      <div class="row2">
+        <div class="field"><label>الفئة</label><select name="category" id="catSelect"></select></div>
+        <div class="field"><label>شارة (اختياري)</label><input name="badge" placeholder="جديد، الأكثر مبيعاً..."></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>السعر (دج) *</label><input name="price" type="number" min="0" step="10" required></div>
+        <div class="field"><label>السعر قبل التخفيض</label><input name="oldPrice" type="number" min="0" step="10"></div>
+      </div>
+      <div class="field"><label>الوصف</label><textarea name="description" rows="5"></textarea></div>
+      <div class="field"><label>الخيارات (ألوان، أحجام... افصلي بفاصلة)</label><input name="options" placeholder="وردي, بيج, أسود"></div>
+      <div class="field">
+        <label>الصور (الأولى هي الصورة الرئيسية)</label>
+        <div class="img-list" id="imgList"></div>
+        <div class="img-actions">
+          <label class="btn outline small upload-btn">📷 رفع صور<input type="file" id="imgUpload" accept="image/*" multiple hidden></label>
+          <input id="imgUrl" type="url" placeholder="أو الصقي رابط صورة">
+          <button type="button" class="btn outline small" id="addImgUrl">إضافة</button>
+        </div>
+        <small id="uploadStatus" class="muted"></small>
+      </div>
+      <div class="row2">
+        <div class="field"><label>الترتيب في المتجر</label><input name="sort" type="number" step="1"></div>
+        <label class="switch-row"><input type="checkbox" name="active" checked> ظاهر في المتجر</label>
+      </div>
+      <p class="form-error" id="productError"></p>
+      <div class="dialog-actions">
+        <button class="btn" type="submit" id="saveProduct">حفظ</button>
+        <button class="btn outline" type="button" data-close>إلغاء</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/products.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
