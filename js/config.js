@@ -17,7 +17,7 @@ const STORE_CONFIG = {
 
   // رابط Google Apps Script (مجاني): يستقبل الطلبات ويشغّل لوحة التحكم admin.html
   // راجع README.md لطريقة الحصول عليه. إذا تركته فارغاً: المنتجات من products.js والطلبات عبر واتساب فقط.
-  apiUrl: "",
+  apiUrl: "https://script.google.com/macros/s/AKfycbwboN6H77rN_aOiNCiZ8vVs6plAXutUucFVHxNtyD2exdncW8RXqhi_MGF-5fRK5rI9/exec",
 
   // فتح واتساب تلقائياً بعد تأكيد الطلب (لنسخة إضافية من الطلب)
   sendOrderToWhatsapp: true,
